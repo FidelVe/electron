@@ -62,7 +62,11 @@ DesktopCapturer::DesktopCapturer(v8::Isolate* isolate) {
   Init(isolate);
 }
 
-DesktopCapturer::~DesktopCapturer() {}
+DesktopCapturer::~DesktopCapturer() {
+  window_capturer_.reset();
+  screen_capturer_.reset();
+  captured_sources_.clear();
+}
 
 void DesktopCapturer::StartHandling(bool capture_window,
                                     bool capture_screen,
@@ -220,13 +224,18 @@ void DesktopCapturer::BuildPrototype(
 
 namespace {
 
+mate::Handle<atom::api::DesktopCapturer> CreateDesktopCapturer(
+    v8::Isolate* isolate) {
+  return atom::api::DesktopCapturer::Create(isolate);
+}
+
 void Initialize(v8::Local<v8::Object> exports,
                 v8::Local<v8::Value> unused,
                 v8::Local<v8::Context> context,
                 void* priv) {
   v8::Isolate* isolate = context->GetIsolate();
   mate::Dictionary dict(isolate, exports);
-  dict.Set("desktopCapturer", atom::api::DesktopCapturer::Create(isolate));
+  dict.SetMethod("createDesktopCapturer", &CreateDesktopCapturer);
 }
 
 }  // namespace
